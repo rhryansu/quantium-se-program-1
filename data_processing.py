@@ -26,11 +26,13 @@ with open("cleaned_file.csv", 'r+') as inp, open("pink_morsels.csv", 'w+') as ou
     data = [row for row in reader]
     for i in data:
         sale = float(i[1].replace('$', '')) * float(i[2])
-        i.append('$' + str(sale))
+        # if dollar symbol is required this line can be uncommented.
+        # i.append('$' + str(sale))
+        i.append(str(sale))
         i.pop(1)
         i.pop(1)
         i[0] = i[len(i) - 1]
         i.pop(len(i) - 1)
-
+    data.insert(0, ["sales", "date", "region"])
     writer.writerows(data)
 
