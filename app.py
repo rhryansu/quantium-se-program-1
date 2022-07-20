@@ -3,9 +3,10 @@
 import csv
 import operator
 
-from dash import Dash, html, dcc
+from dash import Dash, html, dcc, Output, Input
 import plotly.express as px
 import pandas as pd
+import plotly.graph_objs as go
 
 app = Dash(__name__)
 
@@ -40,18 +41,39 @@ df.sort_values(by=['sales'])
 
 fig = px.line(df, x="date", y="sales", color="region")
 
+
 app.layout = html.Div(children=[
     html.H1(children='Pink Morsels Sales by Date and Region'),
 
-    html.Div(children='''
-        Dash: A web application framework for your data.
-    '''),
+    html.Div([dcc.RadioItems(options=[{'label': 'north', 'value': 'north'},
+                                      {'label': 'east', 'value': 'east'},
+                                      {'label': 'south', 'value': 'south'},
+                                      {'label': 'west', 'value': 'west'},
+                                      {'label': 'all', 'value': 'all'}], value='all', id='region-selection')]),
 
     dcc.Graph(
         id='sales-by-date-graph',
         figure=fig
-    )
+    ),
+
+
 ])
+
+
+@app.callback(
+    Output('sales-by-date-graph', 'figure'),
+    [Input('region-selection', 'value')]
+)
+def update_figure(value):
+    dff = pd.read_csv('pink_morsels.csv')
+
+    if value != 'all':
+        dff = dff[dff['region'] == value]
+        line_fig = px.line(dff, x='date', y='sales')
+    else:
+        line_fig = px.line(dff, x='date', y='sales', color='region')
+    return line_fig
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
